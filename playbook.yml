@@ -1,0 +1,9 @@
+- name: install docker and jenkins
+  hosts: jenkins docker
+  gather_fact: true
+  roles:
+    -role: jenkins
+     tags: jenkins
+
+    -role: docker
+     tags: docker

@@ -1,0 +1,70 @@
+- name: Install system updates
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Update package lists
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade packages
+      apt:
+        upgrade: yes
+
+- name: Install Docker
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Install docker packages
+      apt:
+        name:
+          - docker.io
+          - containerd.io
+          - docker-compose-plugin
+        state: present
+
+    - name: Add docker user to docker group
+      user:
+        name: docker
+        append: yes
+        groups: docker
+
+    - name: Restart docker service
+      service:
+        name: docker
+        state: restarted
+
+- name: Install Java
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Install default-jdk
+      apt:
+        name: default-jdk
+        state: present
+
+- name: Install Jenkins
+  hosts: servers
+  become: yes
+  tasks:
+    - name: Download Jenkins
+      get_url:
+        url: http://updates.jenkins-ci.org/download/war/2.421/jenkins.war
+        dest: /tmp/jenkins.war
+
+    - name: Create Jenkins directory
+      file:
+        path: /var/lib/jenkins
+        state: directory
+
+    - name: Copy Jenkins war file
+      copy:
+        src: /tmp/jenkins.war
+        dest: /var/lib/jenkins/jenkins.war
+
+    - name: Start Jenkins service
+      service:
+        name: jenkins
+        state: started
+        enabled: yes
+
